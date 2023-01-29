@@ -15,7 +15,7 @@ import { RecorderTask } from "@/type/recorderTask";
 
 const rootPath = process.cwd();
 const saveRootPath = join(rootPath, "/download")
-const partDuration = "3000"
+const partDuration = "3600"
 
 export class Recorder {
   private savePath!: string;
@@ -38,7 +38,7 @@ export class Recorder {
     this._recorderTask = recorderTask
 
     this.isPost = false
-    this._recorderTask.timeV = `${dayjs().format("YYYY-MM-DD")} ${this.getTitlePostfix()}`;
+    this._recorderTask.timeV = `${dayjs().format("YYYY-MM-DD")}`;
 
     this.logger = getExtendedLogger(`Recorder ${this._recorderTask.recorderName}`)
   }
@@ -72,13 +72,12 @@ export class Recorder {
       this._recorderTask.timeV = `${this._recorderTask.timeV} ${curTime}`
       fs.mkdirSync(newPath)
     } else {
-      const ps = FileHound
+      startNumber = FileHound
         .create()
         .ext(this.videoExt)
         .path(join(this.savePath))
         .findSync()
         .length;
-      startNumber = ps - 1
     }
 
     this.logger.info(`记录相关信息到文件 ${chalk.red(this._recorderTask.recorderName)}，目录：${this.savePath}`)
@@ -89,8 +88,8 @@ export class Recorder {
       'Accept': '*/*',
       'Accept-Encoding': 'gzip, deflate, br',
       'Accept-Language': 'zh,zh-TW;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,ru;q=0.5',
-      'Origin': 'https://www.huya.com',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36'
+      'Origin': 'https://www.douyu.com',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.76'
     }
     let fakeHeaders = ""
 
@@ -114,8 +113,12 @@ export class Recorder {
       partDuration,
       "-segment_start_number",
       startNumber.toString(),
+      "-reset_timestamps", 
+      "1",
       fileName,
-    ]);
+    ], {
+      windowsHide: true
+    });
 
     roomPathStatus.set(this.savePath, 1)
 
@@ -125,14 +128,12 @@ export class Recorder {
     this.App.stderr?.on("data", () => {
 
       // ffmpeg by default the program logs to stderr ,正常流日志不记录
-      // logger.error(data.toString("utf8"));
+      //this.logger.error(data.toString("utf8"));
     });
     this.App.on("exit", (code: number) => {
       this.ffmpegProcessEnd = true
 
-      this.logger.info(`下载流 ${chalk.red(this._recorderTask.recorderName)} 退出，退出码: ${code}，目录：${this.savePath}`);
-      this.logger.info(`记录退出时间 ${chalk.red(this._recorderTask.recorderName)}`)
-
+      this.logger.info(`下载流 "${chalk.red(this._recorderTask.recorderName)}" 退出，退出码: ${code}，目录：${this.savePath}`);
       this.writeInfoToFileStatus(this.savePath, this._recorderTask)
 
       if (!this.ffmpegProcessEndByUser) {
@@ -151,7 +152,7 @@ export class Recorder {
       this.logger.info(`停止录制 ${chalk.red(this._recorderTask.recorderName)}`)
       this.logger.info(`记录退出时间 ${chalk.red(this._recorderTask.recorderName)}`)
 
-      this.writeInfoToFileStatus(this.savePath, this._recorderTask)
+      //this.writeInfoToFileStatus(this.savePath, this._recorderTask)
 
       roomPathStatus.delete(this.savePath)
     }
@@ -191,7 +192,7 @@ export class Recorder {
         timeV: this._recorderTask.timeV
       }
       fs.writeFileSync(fileStatusPath, JSON.stringify(obj, null, '  '))
-      this.logger.info(`Create fileStatus.json: ${JSON.stringify(obj, null, 2)}`)
+      this.logger.debug(`Create fileStatus.json: ${JSON.stringify(obj, null, 2)}`)
     } else {
       // When ffmpeg exit, write endRecordTime to file
       const obj: FileStatus = {
@@ -217,19 +218,6 @@ export class Recorder {
       const obj = JSON.parse(text.toString()) as FileStatus
       this.isPost = obj.isPost || false
     }
-  }
-
-  private getTitlePostfix() {
-    const hour = parseInt(dayjs().format("HH"))
-
-    if (hour >= 0 && hour < 6) return '凌晨'
-
-    if (hour >= 6 && hour < 12) return '早上'
-
-    if (hour >= 12 && hour < 18) return '下午'
-
-    if (hour >= 18 && hour < 24) return '晚上'
-    return ''
   }
 }
 

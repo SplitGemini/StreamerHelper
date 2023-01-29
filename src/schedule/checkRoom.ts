@@ -1,5 +1,7 @@
 import * as dayjs from "dayjs";
 import * as chalk from 'chalk'
+import * as isBetween from 'dayjs/plugin/isBetween'
+dayjs.extend(isBetween) // use plugin
 
 import { getStreamUrl } from "@/engine/getStreamUrl";
 import { RoomStatus } from "@/engine/roomStatus";
@@ -43,6 +45,31 @@ export default new Scheduler(interval, async function () {
             recorderTask.streamUrl = await getStreamUrl(room.roomUrl)
             // with no-error, the room online
             logger.debug(`stream ${JSON.stringify(recorderTask, null, 2)}`)
+
+            if (room.start && room.end){
+                let [s_time, e_time] = [room.start, room.end]
+                    .map((s) => s.split(':'))
+                    .map((a) => a.map((s) => parseInt(s, 10)))
+                    .map((t) => dayjs()
+                                    .set('hour', t[0])
+                                    .set('minute', t[1])
+                                    .set("millisecond", 0))
+                const interrupt = () => {
+                    if (curRecorder)
+                        logger.info(`"${room.name}" 已到结束时间: ${room.end}`)
+                    else
+                        logger.info(`"${room.name}" 未到录制时间: ${room.start}`)
+                    throw new Error()
+                }
+                if (s_time.isAfter(e_time)) {
+                    if (dayjs().isBetween(e_time, s_time)) {
+                        interrupt()
+                    }
+                }else if (!dayjs().isBetween(s_time, e_time)) {
+                    interrupt()
+                }
+            }
+
             if (RoomStatus.has(room.name)) {
                 // 上次检测后认为房间在线
                 if (curRecorder) {
@@ -81,6 +108,7 @@ export default new Scheduler(interval, async function () {
             if (curRecorder) {
                 if (curRecorder.recorderStat()) {
                     // 房间不在线，但仍在录制，先停止录制
+                    logger.info(`${curRecorder.recorderTask.recorderName}直播间下线`)
                     curRecorder.stopRecord()
                 }
                 logger.info(`Will delete Recorder ${curRecorder.recorderTask.recorderName} ${curRecorder.recorderTask.recorderName}`)
@@ -97,6 +125,7 @@ export default new Scheduler(interval, async function () {
         loggerCheck.info(curRecorderText);
 
     }
+
     function getTipsString(curRecorder: Recorder) {
         return `
 直播间名称 ${chalk.red(curRecorder.recorderTask.recorderName)}

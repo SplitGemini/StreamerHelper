@@ -31,5 +31,9 @@
     "esModuleInterop": false /* 允许编译生成文件时，在代码中注入工具类(__importDefault、__importStar)对ESM与commonjs混用情况做兼容处理*/
   },
   "include": [/* 需要编译的文件 */ "src", "typings/**/*.ts"],
-  "exclude": [/* 编译需要排除的文件 */ "node_modules/**"]
+  "exclude": [/* 编译需要排除的文件 */ "node_modules/**"],
+  "ts-node": {
+    // Do not forget to `npm i -D tsconfig-paths`
+    "require": ["tsconfig-paths/register"]
+  }
 }

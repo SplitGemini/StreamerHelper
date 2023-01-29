@@ -82,7 +82,8 @@ export class App {
     initUser = async () => {
         this._logger.info(`initUser`)
         return new Promise<void>(async (resolve, reject) => {
-
+            resolve()
+            return
             this._user = new User(global.config.personInfo)
 
             try {
@@ -133,9 +134,8 @@ export class App {
     initExitSignal = async () => {
 
         this._logger.info(`initExitSignal`)
-
-        process.on("SIGINT", () => {
-            this._logger.info("Receive exit signal, the process will exit after 3 seconds.")
+        const f = () => {
+            this._logger.info("Receive exit signal, the process will exit after 2 seconds.")
             this._logger.info("Process exited by user.")
 
             for (const key in this._schedulers) {
@@ -152,8 +152,11 @@ export class App {
 
             setTimeout(() => {
                 process.exit()
-            }, 3000);
-        })
+            }, 2000);
+        }
+        process.on("SIGINT", f)
+        process.on("SIGTERM", f)
+        process.on('message', f)
     }
 
     initUnCaughtException = () => {

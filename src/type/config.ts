@@ -47,8 +47,9 @@ export interface StreamerInfo {
     copyright: number,
     roomUrl: string,
     tid: number,
-    tags: string[]
-
+    tags: string[],
+    start?: string,
+    end?: string
 }
 
 export type LogLevel = "ALL" | "TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR" | "FATAL" | "MARK" | "OFF"

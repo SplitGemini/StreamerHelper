@@ -7,15 +7,17 @@ log4js.configure({
         cheese: {
             type: "file",
             filename: process.cwd() + "/logs/artanis.log",
-            maxLogSize: 20971520,
-            backups: 10,
+            // 1M
+            maxLogSize: 1048576,
+            backups: 5,
             encoding: "utf-8",
         },
         memory: {
             type: "file",
             filename: process.cwd() + "/logs/memory.log",
-            maxLogSize: 20971520,
-            backups: 10,
+            // 1M
+            maxLogSize: 1048576,
+            backups: 0,
             encoding: "utf-8",
         },
         console: {
