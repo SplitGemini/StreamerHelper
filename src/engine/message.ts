@@ -115,6 +115,16 @@ export class Recorder {
       startNumber.toString(),
       "-reset_timestamps", 
       "1",
+      "-rw_timeout",
+      "30000000", // 30 seconds timeout
+      "-reconnect",
+      "1",
+      "-reconnect_delay_max",
+      "2",
+      "-reconnect_on_http_error",
+      "-reconnect_on_network_error",
+      "-reconnect_streamed",
+      "-reconnect_at_eof",
       fileName,
     ], {
       windowsHide: true
