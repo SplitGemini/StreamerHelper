@@ -1,7 +1,7 @@
 import * as dayjs from "dayjs";
 import * as chalk from 'chalk'
 import * as isBetween from 'dayjs/plugin/isBetween'
-import { existsSync, rmSync } from 'fs'
+import { existsSync } from 'fs'
 dayjs.extend(isBetween) // use plugin
 
 import { getStreamUrl } from "@/engine/getStreamUrl";
@@ -59,10 +59,8 @@ export default new Scheduler(interval, async function () {
                     if (curRecorder) {
                         logger.info(`"${room.name}" 已到结束时间: ${room.end}`)
                         if(global.config.StreamerHelper.auto_shutdown){
-                            if (!existsSync('../noshutdown')) {
+                            if (!existsSync('noshutdown')) {
                                 require('child_process').exec('shutdown -s -t 60')
-                            } else {
-                                rmSync('../noshutdown')
                             }
                         }
                     }
