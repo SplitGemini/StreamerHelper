@@ -16,3 +16,4 @@ download/*
 *.png
 package-lock.json
 *.bat
+download

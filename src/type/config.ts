@@ -20,7 +20,8 @@ export interface Config {
                 enable: boolean,
                 sendKey: string
             }
-        }
+        },
+        auto_shutdown: boolean
     },
     personInfo: PersonInfo,
     streamerInfo: StreamerInfo[]
