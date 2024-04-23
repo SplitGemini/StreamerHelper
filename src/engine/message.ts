@@ -89,7 +89,7 @@ export class Recorder {
       'Accept-Encoding': 'gzip, deflate, br',
       'Accept-Language': 'zh,zh-TW;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,ru;q=0.5',
       'Origin': 'https://www.douyu.com',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.76'
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0'
     }
     let fakeHeaders = ""
 
@@ -120,11 +120,21 @@ export class Recorder {
       "-reconnect",
       "1",
       "-reconnect_delay_max",
-      "2",
+      "5", // reconnect delay seconds
       "-reconnect_on_http_error",
+      "1",
       "-reconnect_on_network_error",
+      "1",
       "-reconnect_streamed",
+      "1",
       "-reconnect_at_eof",
+      "1",
+      "-fflags", 
+      "flush_packets+genpts",
+      "-buffer_size", 
+      "8388608",
+      "-force_key_frames",
+      "expr:gte(t,n_forced*segment_time)", // force key frames at every segment_time
       fileName,
     ], {
       windowsHide: true

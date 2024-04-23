@@ -2,7 +2,6 @@ import * as fs from "fs"
 import { join } from 'path'
 import { EventEmitter } from 'events'
 
-import { log4js } from "@/log/config";
 import { FileStatus } from "@/type/fileStatus";
 
 export const RoomTypeArr = ["huya", "bilibili", "douyu"];
@@ -53,7 +52,6 @@ export const changeFileStatus = (status: FileStatus, fileStatusPath: string) => 
         merge(obj, status)
         const stringifies = JSON.stringify(obj, null, 2)
         fs.writeFileSync(fileStatusPath, stringifies)
-        log4js.getLogger().info(`Write Content ${JSON.stringify(obj, null, 2)}`)
     }
 }
 
