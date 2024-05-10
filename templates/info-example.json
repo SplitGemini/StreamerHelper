@@ -19,8 +19,7 @@
         "enable": false,
         "sendkey": ""
       }
-    },
-    "auto_shutdown": false
+    }
   },
   "personInfo": {
     "nickname": "",
