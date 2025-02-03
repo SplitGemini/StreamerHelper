@@ -12,6 +12,7 @@ import { FileStatus } from "@/type/fileStatus";
 import { roomPathStatus } from "@/engine/roomPathStatus";
 import { uploadStatus } from "@/uploader/uploadStatus";
 import { RecorderTask } from "@/type/recorderTask";
+import { RingBuffer } from 'ring-buffer-ts';
 
 const rootPath = process.cwd();
 const saveRootPath = join(rootPath, "/download")
@@ -26,6 +27,7 @@ export class Recorder {
   private readonly _recorderTask: RecorderTask;
   private readonly videoExt = 'mp4'
   private isPost: boolean
+  private ringBuffer = new RingBuffer<string>(10);
 
   public get recorderTask() {
     return this._recorderTask
@@ -89,7 +91,7 @@ export class Recorder {
       'Accept-Encoding': 'gzip, deflate, br',
       'Accept-Language': 'zh,zh-TW;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,ru;q=0.5',
       'Origin': 'https://www.douyu.com',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0'
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0'
     }
     let fakeHeaders = ""
 
@@ -99,14 +101,17 @@ export class Recorder {
 
     const cmd = `ffmpeg`;
     this.App = spawn(cmd, [
+      "-hide_banner",
+      "-y",
       "-headers",
       fakeHeaders,
       "-i",
       this._recorderTask.streamUrl,
       "-c:v",
       "copy",
-      "-c:a",
-      "copy",
+      "-c:a", "aac",
+      "-af", "highpass=f=100,adeclick,adeclip,alimiter=limit=0.98", // 先用高通滤波削减低频喷麦，再用adeclick去除爆破音，再用adeclip试图修复剪波，最后再用alimiter防止输出再次出现爆峰
+      "-b:a", "320k",
       "-f",
       "segment",
       "-segment_time",
@@ -145,15 +150,16 @@ export class Recorder {
     this.App.stdout?.on("data", (data: any) => {
       this.logger.info(`FFmpeg error: ${data.toString("utf8")}`);
     });
-    this.App.stderr?.on("data", () => {
+    this.App.stderr?.on("data", (data: string) => {
 
-      // ffmpeg by default the program logs to stderr ,正常流日志不记录
-      //this.logger.error(data.toString("utf8"));
+      // 记录最新10条
+      this.ringBuffer.add(data);
     });
     this.App.on("exit", (code: number) => {
       this.ffmpegProcessEnd = true
 
       this.logger.info(`下载流 "${chalk.red(this._recorderTask.recorderName)}" 退出，退出码: ${code}，目录：${this.savePath}`);
+      this.logger.info(this.ringBuffer.toArray().join('\n'))
       this.writeInfoToFileStatus(this.savePath, this._recorderTask)
 
       if (!this.ffmpegProcessEndByUser) {

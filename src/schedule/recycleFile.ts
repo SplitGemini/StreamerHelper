@@ -2,6 +2,7 @@
 
 import * as fs from "fs";
 import { join } from 'path'
+import trash from 'trash'
 
 import { FileStatus } from "@/type/fileStatus";
 import { deleteFolder,FileHound } from "@/util/utils";
@@ -92,8 +93,19 @@ export default new Scheduler(interval, async function () {
 
     }
 
+    const sourcePath = join(process.cwd(), "download")
+    
+    const directoriesToDelete =  fs.readdirSync(sourcePath, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => join(sourcePath, dirent.name)).sort().reverse().slice(80);
+
+    if(directoriesToDelete.length > 0){
+        logger.info(`Remove directories: ${directoriesToDelete}`)
+        await trash(directoriesToDelete, { glob: false })
+    }
+
     const files: string[] = await FileHound.create()
-        .paths(join(process.cwd(), "/download"))
+        .paths(sourcePath)
         .match('fileStatus.json')
         .ext('json')
         .find();

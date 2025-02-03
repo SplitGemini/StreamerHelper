@@ -39,6 +39,8 @@
     "qrcode-terminal": "^0.12.0",
     "qs": "^6.9.4",
     "retry-axios": "^2.4.0",
+    "ring-buffer-ts": "^1.2.0",
+    "trash": "^9.0.0",
     "uuid": "^8.3.0"
   },
   "devDependencies": {
