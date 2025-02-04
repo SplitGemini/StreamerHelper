@@ -110,7 +110,7 @@ export class Recorder {
       "-c:v",
       "copy",
       "-c:a", "aac",
-      "-af", "highpass=f=100,adeclick,adeclip,alimiter=limit=0.98", // 先用高通滤波削减低频喷麦，再用adeclick去除爆破音，再用adeclip试图修复剪波，最后再用alimiter防止输出再次出现爆峰
+      "-af", "highpass=f=100", // 先用高通滤波削减低频喷麦
       "-b:a", "320k",
       "-f",
       "segment",
