@@ -110,7 +110,7 @@ export class Recorder {
       "-c:v",
       "copy",
       "-c:a", "aac",
-      "-af", "highpass=f=100", // 先用高通滤波削减低频喷麦
+      "-af", "highpass=f=30", // 先用高通滤波削减低频喷麦
       "-b:a", "320k",
       "-f",
       "segment",
