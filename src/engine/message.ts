@@ -74,12 +74,13 @@ export class Recorder {
       this._recorderTask.timeV = `${this._recorderTask.timeV} ${curTime}`
       fs.mkdirSync(newPath)
     } else {
-      startNumber = FileHound
+      const ps = FileHound
         .create()
         .ext(this.videoExt)
         .path(join(this.savePath))
         .findSync()
         .length;
+      startNumber = ps - 1 > 0 ? ps - 1 : 0
     }
 
     this.logger.info(`记录相关信息到文件 ${chalk.red(this._recorderTask.recorderName)}，目录：${this.savePath}`)
@@ -87,11 +88,10 @@ export class Recorder {
 
     const fileName: string = join(this.savePath, `${this._recorderTask.recorderName}-${this._recorderTask.timeV}-part-%03d.${this.videoExt}`);
     const fakeX: any = {
-      'Accept': '*/*',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'Accept-Language': 'zh,zh-TW;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,ru;q=0.5',
-      'Origin': 'https://www.douyu.com',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0'
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Encoding': 'gzip, deflate',
+      'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
+      'User-Agent': `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${Math.floor(Math.random() * (120 - 100 + 1)) + 100}.0.0.0 Safari/537.36`
     }
     let fakeHeaders = ""
 
