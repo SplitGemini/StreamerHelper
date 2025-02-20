@@ -74,13 +74,12 @@ export class Recorder {
       this._recorderTask.timeV = `${this._recorderTask.timeV} ${curTime}`
       fs.mkdirSync(newPath)
     } else {
-      const ps = FileHound
+      startNumber = FileHound
         .create()
         .ext(this.videoExt)
         .path(join(this.savePath))
         .findSync()
         .length;
-      startNumber = ps - 1 > 0 ? ps - 1 : 0
     }
 
     this.logger.info(`记录相关信息到文件 ${chalk.red(this._recorderTask.recorderName)}，目录：${this.savePath}`)
